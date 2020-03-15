@@ -20,63 +20,80 @@
 ---
 ### Writeup / README
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
-
-You're reading it! Below I describe how I addressed each rubric point and where in my code each point is handled.
-
 ### Explain the Starter Code
 
 #### 1. Explain the functionality of what's provided in `motion_planning.py` and `planning_utils.py`
-These scripts contain a basic planning implementation that includes...
 
-And here's a lovely image of my results (ok this image has nothing to do with it, but it's a nice example of how to include images in your writeup!)
-![Top Down View](./misc/high_up.png)
+The Key difference between `motion_planning.py` and `backyard_flyer.py` is the how the waypoints are generated. `backyard_flyer.py` uses a basic function called `calculate_box` to generate the waypoints it needs after the desired altitude is met. `calculate_box` returns a set of predefined waypoints for flying in a square motion. `motion_planning.py` on the other hand, generates waypoints by calling `plan_path` after drone is armed. `plan_path` reads in a grid, sets a start position and a goal position, then utilizing helper functions defined in `planning_utils`, it generates a path from start to goal position. `motion_planning.py` also includes an extra function to display the waypoints in the simulator.
 
-Here's | A | Snappy | Table
---- | --- | --- | ---
-1 | `highlight` | **bold** | 7.41
-2 | a | b | c
-3 | *italic* | text | 403
-4 | 2 | 3 | abcd
+
 
 ### Implementing Your Path Planning Algorithm
 
 #### 1. Set your global home position
 Here students should read the first line of the csv file, extract lat0 and lon0 as floating point values and use the self.set_home_position() method to set global home. Explain briefly how you accomplished this in your code.
 
-
-And here is a lovely picture of our downtown San Francisco environment from above!
-![Map of SF](./misc/map.png)
+Using a combination of file readline and split functions i extracted the lon0 and lat0 into a dict and i used that to set the home_position
+see line 123 to 131
 
 #### 2. Set your current local position
 Here as long as you successfully determine your local position relative to global home you'll be all set. Explain briefly how you accomplished this in your code.
 
-
-Meanwhile, here's a picture of me flying through the trees!
-![Forest Flying](./misc/in_the_trees.png)
+here, i set the local_position by converting
+the current the global_home position which is given as a long,lat coordinate to a local ECEF 
+using the global_to_local function
 
 #### 3. Set grid start position from local position
-This is another step in adding flexibility to the start location. As long as it works you're good to go!
+here we use our calculated NED coordinates to set our starting position. we subtract min north and east too make sure our position is relative to the grid.
+
+        grid_start = (int(local_north - north_offset),int(local_east-east_offset))
+
 
 #### 4. Set grid goal position from geodetic coords
-This step is to add flexibility to the desired goal location. Should be able to choose any (lat, lon) within the map and have it rendered to a goal location on the grid.
+Here, we provide a way to pass in any lon,lat to use as the
+goal position. Then we convert to NED using the global_to_local function
+
+        local_goal_north, local_goal_east, _ = global_to_local(self._global_goal_position, self.global_home)
+        grid_goal = (int(local_goal_north - north_offset),int(local_goal_east-east_offset))
+
 
 #### 5. Modify A* to include diagonal motion (or replace A* altogether)
-Minimal requirement here is to modify the code in planning_utils() to update the A* implementation to include diagonal motions on the grid that have a cost of sqrt(2), but more creative solutions are welcome. Explain the code you used to accomplish this step.
+The first step was to add in our new diagonal movements to the actions enum with the cost `np.sqrt(2)`. We can determine the x,y values by simply merging the values for each movement. eg. `NORTH = (-1, 0` + `EAST = (0, 1` = `NORTH_EAST = (-1,1,`
+
+        NORTH_EAST = (-1,1,np.sqrt(2))
+        NORTH_WEST = (-1,-1,np.sqrt(2))
+        SOUTH_EAST = (1,1,np.sqrt(2))
+        SOUTH_WEST = (1,-1,np.sqrt(2))
+
+Then we update the `valid_actions` function to make sure these are valid movements in a given state
+
+        if x-1 < 0 or y+1 > m or grid[x-1,y+1] == 1:
+            valid_actions.remove(Action.NORTH_EAST)
+        if x-1 < 0 or y-1 > m or grid[x-1,y-1] == 1:
+            valid_actions.remove(Action.NORTH_WEST)
+        if x+1 > n or y+1 > m or grid[x+1,y+1] == 1:
+            valid_actions.remove(Action.SOUTH_EAST)
+        if x+1 > n or y-1 < 0 or grid[x+1,y-1] == 1:
+            valid_actions.remove(Action.SOUTH_WEST)
+
 
 #### 6. Cull waypoints 
-For this step you can use a collinearity test or ray tracing method like Bresenham. The idea is simply to prune your path of unnecessary waypoints. Explain the code you used to accomplish this step.
+For this step you can use a collinearity test or ray tracing method like Bresenham   . The idea is simply to prune your path of unnecessary waypoints. Explain the code you used to accomplish this step.
+
+First we implement collinearity to detect and remove points within a straight path.  
+This works well, the downside is that for diagonal movements we end up with a short jiggered path. see image below
+
+![Collinearity Path](./collinearity_path.png)
+
+To fix the short angled paths in the collinearity approach, we implement Bresenham, a ray tracing method, which provides a list cells required to draw a line between 2 points. So far as those cells don't include collide with an obstacle, we can go ahead and prune any points in between the given points.
+
+![Bresenham Path](./Bresenham_path.png)
 
 
 
 ### Execute the flight
 #### 1. Does it work?
 It works!
-
-### Double check that you've met specifications for each of the [rubric](https://review.udacity.com/#!/rubrics/1534/view) points.
-  
-# Extra Challenges: Real World Planning
-
-For an extra challenge, consider implementing some of the techniques described in the "Real World Planning" lesson. You could try implementing a vehicle model to take dynamic constraints into account, or implement a replanning method to invoke if you get off course or encounter unexpected obstacles.
+run with `python motion_planning.py` or with a goal lon,lat `python motion_planning.py --goal_pos=-122.399688,37.395765`
 
 
