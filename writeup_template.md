@@ -91,9 +91,11 @@ To fix the short angled paths in the collinearity approach, we implement Bresenh
 
 
 
-### Execute the flight
+### Execute the fliImrpovementsght
 #### 1. Does it work?
 It works!
 run with `python motion_planning.py` or with a goal lon,lat `python motion_planning.py --goal_pos=-122.399688,37.395765`
 
-
+####Improvements and TODOs
+* Use a graph for configuration space instead of grid ( grid seems to be computationally intensive for long distance planning)
+* try a re-planner for dynamic obstacles
