@@ -2,9 +2,9 @@
 ![Quad Image](./misc/enroute.png)
 
 ---
+3D motion planning techniques to plan and execute a mission in a complex urban environment!
 
-
-# Required Steps for a Passing Submission:
+# Required Steps:
 1. Load the 2.5D map in the colliders.csv file describing the environment.
 2. Discretize the environment into a grid or graph representation.
 3. Define the start and goal locations.
@@ -14,13 +14,6 @@
 7. Write it up.
 8. Congratulations!  Your Done!
 
-## [Rubric](https://review.udacity.com/#!/rubrics/1534/view) Points
-### Here I will consider the rubric points individually and describe how I addressed each point in my implementation.  
-
----
-### Writeup / README
-
-### Explain the Starter Code
 
 #### 1. Explain the functionality of what's provided in `motion_planning.py` and `planning_utils.py`
 
