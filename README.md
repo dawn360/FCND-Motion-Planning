@@ -4,15 +4,14 @@
 ---
 3D motion planning techniques to plan and execute a mission in a complex urban environment!
 
-# Required Steps:
+# Outline/Steps:
 1. Load the 2.5D map in the colliders.csv file describing the environment.
 2. Discretize the environment into a grid or graph representation.
 3. Define the start and goal locations.
 4. Perform a search using A* or other search algorithm.
 5. Use a collinearity test or ray tracing method (like Bresenham) to remove unnecessary waypoints.
 6. Return waypoints in local ECEF coordinates (format for `self.all_waypoints` is [N, E, altitude, heading], where the drone’s start location corresponds to [0, 0, 0, 0].
-7. Write it up.
-8. Congratulations!  Your Done!
+
 
 
 #### 1. Explain the functionality of what's provided in `motion_planning.py` and `planning_utils.py`
